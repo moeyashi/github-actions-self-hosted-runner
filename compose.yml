@@ -1,0 +1,70 @@
+services:
+  docker: # クライアントから接続する際にtcp://docker:2376にする必要があるので `docker` である必要がある
+    image: docker:24.0-dind-rootless
+    privileged: true
+    ports:
+      - "2376:2376" # デフォルトで2376ポートがlistenされている
+    networks:
+      - dind-rootless
+    volumes:
+      # dind-rootlessが作成してくれる証明書をクライアント側に渡すためにボリュームをマウントする
+      # https://github.com/docker-library/docker/blob/679ff1a932a1bdf4341fb0d5cb06f088c77d44bf/24/dind/dockerd-entrypoint.sh#LL130C1-L130C1
+      - type: volume
+        source: rootless-certs
+        target: /certs
+      # ジョブ内でbind mountを可能にするためにactions用のワークスペースをvolumeで共有して同じパスにマウントする
+      - type: volume
+        source: workspace
+        target: /_work
+      - type: volume
+        source: actions-runner
+        target: /actions-runner
+      - type: volume
+        source: hostedtoolcache
+        target: /opt/hostedtoolcache
+  client:
+    # image: ghcr.io/myoung34/docker-github-actions-runner:2.304.0
+    # runner-container-hooksを仕込むためにDockerfileを指定する
+    build:
+      context: .
+      dockerfile: Dockerfile.with_rootless
+    environment:
+      DOCKER_TLS_VERIFY: "1"
+      DOCKER_CERT_PATH: /rootless-certs/client/
+      DOCKER_HOST: tcp://docker:2376 # ホスト名がdockerでないと証明書の検証が通らない。例えばtcp://dind:2376にするとこのようなエラーになる
+
+      RUNNER_SCOPE: org
+      ORG_NAME: ${ORG_NAME}
+      LABELS: dind-rootless,ubuntu-latest
+      RUNNER_NAME_PREFIX: container
+      DISABLE_AUTO_UPDATE: 1
+      RUN_AS_ROOT: false
+      ACCESS_TOKEN: ${GITHUB_PAT}
+      RUNNER_WORKDIR: /_work
+    networks:
+      - dind-rootless
+    volumes:
+      # 同じボリュームをマウントすることで証明書を持ち込む
+      - type: volume
+        source: rootless-certs
+        target: /rootless-certs
+      # ジョブ内でbind mountを可能にするためにactions用のワークスペースをvolumeで共有して同じパスにマウントする
+      - type: volume
+        source: workspace
+        target: /_work
+      - type: volume
+        source: actions-runner
+        target: /actions-runner
+      - type: volume
+        source: hostedtoolcache
+        target: /opt/hostedtoolcache
+    depends_on:
+      - docker
+
+networks:
+  dind-rootless:
+volumes:
+  rootless-certs:
+  workspace:
+  actions-runner:
+  hostedtoolcache:

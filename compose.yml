@@ -2,8 +2,8 @@ services:
   docker: # クライアントから接続する際にtcp://docker:2376にする必要があるので `docker` である必要がある
     image: docker:24.0-dind-rootless
     privileged: true
-    ports:
-      - "2376:2376" # デフォルトで2376ポートがlistenされている
+    # ports:
+    #   - "${DOCKER_PORT:-2376}:2376" # デフォルトで2376ポートがlistenされている
     networks:
       - dind-rootless
     volumes:

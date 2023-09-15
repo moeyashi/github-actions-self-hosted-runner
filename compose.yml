@@ -2,6 +2,7 @@ services:
   docker: # クライアントから接続する際にtcp://docker:2376にする必要があるので `docker` である必要がある
     image: docker:24.0-dind-rootless
     privileged: true
+    restart: always
     # ports:
     #   - "${DOCKER_PORT:-2376}:2376" # デフォルトで2376ポートがlistenされている
     networks:
@@ -28,13 +29,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.with_rootless
+    restart: always
     environment:
       DOCKER_TLS_VERIFY: "1"
       DOCKER_CERT_PATH: /rootless-certs/client/
       DOCKER_HOST: tcp://docker:2376 # ホスト名がdockerでないと証明書の検証が通らない。例えばtcp://dind:2376にするとこのようなエラーになる
 
-      RUNNER_SCOPE: org
-      ORG_NAME: ${ORG_NAME}
+      # org
+      # RUNNER_SCOPE: org
+      # ORG_NAME: ${ORG_NAME}
+
+      # repo
+      RUNNER_SCOPE: repo
+      REPO_URL: ${REPO_URL}
+
       LABELS: dind-rootless,ubuntu-latest
       RUNNER_NAME_PREFIX: container
       DISABLE_AUTO_UPDATE: 1

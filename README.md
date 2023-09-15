@@ -11,6 +11,7 @@ docker compose -p github-actions-self-hosted-runner up -d
 
 ## 変更点
 
+- repo単位で動くように
 - cypressが動くように
   + 参考：https://docs.cypress.io/guides/getting-started/installing-cypress#UbuntuDebian
   + ```

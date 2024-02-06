@@ -9,6 +9,13 @@ https://zenn.dev/kesin11/scraps/6a5eed6e2d5cba
 docker compose -p github-actions-self-hosted-runner up -d
 ```
 
+## runnerのアップデート
+
+```
+docker compose -p github-actions-self-hosted-runner down -v
+docker compose -p github-actions-self-hosted-runner up -d --build
+```
+
 ## 変更点
 
 - repo単位で動くように

@@ -1,7 +1,7 @@
 # dind-rootlessをsidecarで立ててdockerをTCP経由で使う場合に必要な設定を追加したDockerfile
 FROM myoung34/github-runner
 
-ARG RUNNER_CONTAINER_HOOKS_VERSION=0.3.2
+ARG RUNNER_CONTAINER_HOOKS_VERSION=0.5.1
 # https://github.com/actions/runner-container-hooks
 
 ARG RUNNER_DIR=/actions-runner
